@@ -88,9 +88,33 @@ function counterReducer(state: CountState, action: CountAction) {
   }
 }
 
+const useNumber = (initialValue: number) => useState<number>(initialValue);
+
+type UseNumberValue = ReturnType<typeof useNumber>[0];
+
+type UseNumberSetValue = ReturnType<typeof useNumber>[1];
+
+
+const Button: React.FunctionComponent<React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & { title?: string }> =
+  ({ children, style, title, ...rest }) => {
+    return (
+      <button {...rest} style={{ ...style, background: 'red', color: 'white', fontSize: 'large' }}>{title ?? children}</button>
+    )
+  }
+
+const Incremenent: React.FunctionComponent<
+  {
+    value: UseNumberValue,
+    setValue: UseNumberSetValue
+  }> = ({ value, setValue }) => (
+    <Button onClick={() => setValue(value + 1)} title={`Add - ${value}`}></Button>
+  )
+
 
 function App() {
   const [payload, setPayload] = useState<Payload | null>(null);
+
+  const [value, setValue] = useNumber(0);
 
   useEffect(() => {
     fetch("/data.json")
@@ -120,13 +144,14 @@ function App() {
       <div>
         Count: {state.count}
         {/* Calling our actions on button click */}
-        <button
+        <Button
           onClick={() => dispatch({ type: CountActionKind.INCREASE, payload: 5 })}
         >
           +
-        </button>
-        <button onClick={() => dispatch({ type: CountActionKind.DECREASE, payload: 5 })}>-</button>
+        </Button>
+        <Button onClick={() => dispatch({ type: CountActionKind.DECREASE, payload: 5 })}>-</Button>
       </div>
+      <Incremenent value={value} setValue={setValue} />
     </div>
   );
 }
