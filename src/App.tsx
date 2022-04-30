@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import './App.css';
+import { useTodos } from './hooks/useTodos';
 
 const Heading = ({ title }: { title: string }) => <h2>Heading {title}</h2>
 
@@ -112,6 +113,9 @@ const Incremenent: React.FunctionComponent<
 
 
 function App() {
+  const { todos, addTodo, removeTodo } = useTodos([
+    { id: 0, text: "Hey there", done: false },
+  ]);
   const [payload, setPayload] = useState<Payload | null>(null);
 
   const [value, setValue] = useNumber(0);
@@ -131,6 +135,13 @@ function App() {
   const onListClick = useCallback((item: string) => {
     console.log(item)
   }, []);
+  const newTodoRef = useRef<HTMLInputElement>(null);
+  const onAddTodo = useCallback(() => {
+    if (newTodoRef.current) {
+      addTodo(newTodoRef.current.value);
+      newTodoRef.current.value = "";
+    }
+  }, [addTodo]);
 
   return (
     <div className="App">
@@ -152,6 +163,16 @@ function App() {
         <Button onClick={() => dispatch({ type: CountActionKind.DECREASE, payload: 5 })}>-</Button>
       </div>
       <Incremenent value={value} setValue={setValue} />
+      {todos.map((todo) => (
+        <div key={todo.id}>
+          {todo.text}
+          <button onClick={() => removeTodo(todo.id)}>Remove</button>
+        </div>
+      ))}
+      <div>
+        <input type="text" ref={newTodoRef} />
+        <Button onClick={onAddTodo}>Add Todo</Button>
+      </div>
     </div>
   );
 }
